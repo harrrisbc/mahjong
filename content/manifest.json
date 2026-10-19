@@ -1,0 +1,21 @@
+{
+  "default": "default.mp4",
+  "fans": {
+    "da_si_xi": {"fan": 13, "file": "fans/da_si_xi.mp4"},
+    "shi_san_yao": {"fan": 13, "file": "fans/shi_san_yao.mp4"},
+    "jiu_lian_bao_deng": {"fan": 13, "file": "fans/jiu_lian_bao_deng.mp4"},
+    "qing_yao_jiu": {"fan": 13, "file": "fans/qing_yao_jiu.mp4"},
+    "zi_yi_se": {"fan": 13, "file": "fans/zi_yi_se.mp4"},
+    "da_san_yuan": {"fan": 8, "file": "fans/da_san_yuan.mp4"},
+    "qing_yi_se": {"fan": 7, "file": "fans/qing_yi_se.mp4"},
+    "xiao_si_xi": {"fan": 6, "file": "fans/xiao_si_xi.mp4"},
+    "xiao_san_yuan": {"fan": 5, "file": "fans/xiao_san_yuan.mp4"},
+    "hun_yao_jiu": {"fan": 5, "file": "fans/hun_yao_jiu.mp4"},
+    "peng_peng_hu": {"fan": 3, "file": "fans/peng_peng_hu.mp4"},
+    "hun_yi_se": {"fan": 3, "file": "fans/hun_yi_se.mp4"},
+    "ji_hu": {"fan": 1, "file": "fans/ji_hu.mp4"},
+    "zi_mo": {"fan": 1, "file": "fans/zi_mo.mp4"},
+    "men_qing": {"fan": 1, "file": "fans/men_qing.mp4"},
+    "wu_hua": {"fan": 1, "file": "fans/wu_hua.mp4"}
+  }
+}
