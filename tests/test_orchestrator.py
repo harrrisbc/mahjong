@@ -4,7 +4,7 @@ from mahjong_projector.content_map.mapper import ContentMapper
 from mahjong_projector.fan_engine.engine import FanEngine
 from mahjong_projector.orchestrator import Orchestrator
 from mahjong_projector.player.playback import Player
-from mahjong_projector.types import VisionResult
+from mahjong_projector.types import VisionResult, VoiceEvent
 from mahjong_projector.voice.listener import VoiceListener
 
 
@@ -71,3 +71,28 @@ def test_low_confidence_defaults(tmp_path):
     req = orch.handle_sik()
     assert req.reason == "default"
     assert played[0].endswith("default.mp4")
+
+
+def test_on_voice_ignores_sik_while_playing(tmp_path):
+    import json
+
+    (tmp_path / "manifest.json").write_text(json.dumps({"default": "default.mp4", "fans": {}}))
+    (tmp_path / "default.mp4").write_bytes(b"d")
+    play_count = 0
+
+    def runner(_cmd):
+        nonlocal play_count
+        play_count += 1
+        return 0
+
+    orch = Orchestrator(
+        voice=VoiceListener(model_dir=None),
+        vision=FakeVision(),
+        fan_engine=FanEngine(),
+        content=ContentMapper(tmp_path / "manifest.json", tmp_path),
+        player=Player(runner=runner, which=lambda n: "/bin/mpv" if n == "mpv" else None),
+        capture_frame=lambda: np.zeros((10, 10, 3), dtype=np.uint8),
+    )
+    orch.state = "playing"
+    assert orch.on_voice(VoiceEvent("食", 0.0)) is None
+    assert play_count == 0

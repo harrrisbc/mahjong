@@ -38,14 +38,21 @@ class Orchestrator:
         self.state: State = "listening"
 
     def on_voice(self, event: VoiceEvent) -> PlayRequest | None:
-        if self.state == "playing":
-            log.info("ignore 食 while playing")
-            return None
         if event.keyword != "食":
             return None
+        if self.state not in ("idle", "listening"):
+            log.info("ignore 食 while %s", self.state)
+            return None
+        if self.state == "idle":
+            self.state = "listening"
         return self.handle_sik()
 
-    def handle_sik(self) -> PlayRequest:
+    def handle_sik(self) -> PlayRequest | None:
+        if self.state not in ("idle", "listening"):
+            log.info("ignore 食 mid-cycle state=%s", self.state)
+            return None
+        if self.state == "idle":
+            self.state = "listening"
         self.state = "capturing"
         frame = self.capture_frame()
         if frame is None:
