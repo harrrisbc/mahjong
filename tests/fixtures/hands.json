@@ -1,0 +1,20 @@
+[
+  {
+    "name": "peng_peng_hu",
+    "tiles": ["1m","1m","1m","2p","2p","2p","3s","3s","3s","we","we","we","dr","dr"],
+    "winner_seat": "east",
+    "expected_fan_id": "peng_peng_hu"
+  },
+  {
+    "name": "qing_yi_se",
+    "tiles": ["1m","1m","1m","2m","3m","4m","5m","6m","7m","8m","9m","9m","9m","5m"],
+    "winner_seat": "south",
+    "expected_fan_id": "qing_yi_se"
+  },
+  {
+    "name": "zi_yi_se",
+    "tiles": ["we","we","we","ws","ws","ws","ww","ww","ww","wn","wn","wn","dr","dr"],
+    "winner_seat": "west",
+    "expected_fan_id": "da_si_xi"
+  }
+]

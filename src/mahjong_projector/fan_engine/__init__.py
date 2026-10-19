@@ -1,1 +1,3 @@
-"""Fan engine package. FanEngine export is added in Task 4."""
+from mahjong_projector.fan_engine.engine import FanEngine
+
+__all__ = ["FanEngine"]
