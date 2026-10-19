@@ -51,13 +51,13 @@ def has_nine_gates(tiles: list[str]) -> bool:
 
 
 def _dragon_pung_count(analysis: HandAnalysis) -> tuple[int, bool]:
-    pungs = sum(1 for m in analysis.melds if m.kind == "pung" and m.tiles[0] in DRAGONS)
+    pungs = sum(1 for m in analysis.melds if m.kind in {"pung", "kong"} and m.tiles[0] in DRAGONS)
     pair_dragon = analysis.pair[0] in DRAGONS
     return pungs, pair_dragon
 
 
 def _wind_pung_count(analysis: HandAnalysis) -> tuple[int, bool]:
-    pungs = sum(1 for m in analysis.melds if m.kind == "pung" and m.tiles[0] in WINDS)
+    pungs = sum(1 for m in analysis.melds if m.kind in {"pung", "kong"} and m.tiles[0] in WINDS)
     pair_wind = analysis.pair[0] in WINDS
     return pungs, pair_wind
 

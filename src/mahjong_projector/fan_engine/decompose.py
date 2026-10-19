@@ -50,16 +50,19 @@ def _chow_options(tile: str, counts: dict[str, int]) -> list[tuple[str, str, str
 
 def _search(counts: dict[str, int], melds: list[Meld]) -> list[Meld] | None:
     if sum(counts.values()) == 0:
-        return melds
+        return melds if len(melds) == 4 else None
+    if len(melds) >= 4:
+        return None
     tile = next(t for t, c in counts.items() if c > 0)
-    # pung
-    if counts[tile] >= 3:
-        counts[tile] -= 3
-        melds.append(Meld("pung", (tile, tile, tile)))
+    for kind, size in (("pung", 3), ("kong", 4)):
+        if counts[tile] < size:
+            continue
+        counts[tile] -= size
+        melds.append(Meld(kind, (tile,) * size))
         if _search(counts, melds) is not None:
             return melds
         melds.pop()
-        counts[tile] += 3
+        counts[tile] += size
     # chow
     for group in _chow_options(tile, counts):
         for g in group:
@@ -75,10 +78,8 @@ def _search(counts: dict[str, int], melds: list[Meld]) -> list[Meld] | None:
 
 def analyze_hand(tiles: list[str]) -> HandAnalysis | None:
     body = strip_flowers(tiles)
-    if len(body) not in {14, 11, 8}:  # allow partial revealed hands only at 14 for v1 win shape
-        # v1: require 14-tile body for structured fans; callers may still use pattern fans on raw tiles
-        pass
-    if len(body) != 14:
+    # pair + four melds, each kong adding one tile over a pung
+    if not 14 <= len(body) <= 18:
         return None
     counts = dict(count_tiles(body))
     if any(n > 4 for n in counts.values()):
