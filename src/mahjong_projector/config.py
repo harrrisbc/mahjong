@@ -13,6 +13,7 @@ class AppConfig:
     camera_index: int = 0
     display_index: int = 1
     vision_confidence_threshold: float = 0.50
+    vision_detection_threshold: float = 0.25
     sample_rate: int = 16000
 
     @classmethod

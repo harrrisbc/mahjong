@@ -13,18 +13,20 @@ log = logging.getLogger(__name__)
 
 
 class VisionPipeline:
-    def __init__(self, model: Any | None = None, confidence_threshold: float = 0.50) -> None:
+    def __init__(self, model: Any | None = None, detection_threshold: float = 0.25) -> None:
         self.model = model
-        self.confidence_threshold = confidence_threshold
+        # Keep this below the orchestrator's hand gate so weak winner tiles survive to lower
+        # VisionResult.confidence; filtering at the gate value would make the gate unreachable.
+        self.detection_threshold = detection_threshold
 
     @classmethod
-    def from_weights(cls, weights: Path, confidence_threshold: float = 0.50) -> VisionPipeline:
+    def from_weights(cls, weights: Path, detection_threshold: float = 0.25) -> VisionPipeline:
         if not weights.is_file():
             log.warning("YOLO weights missing at %s", weights)
-            return cls(model=None, confidence_threshold=confidence_threshold)
+            return cls(model=None, detection_threshold=detection_threshold)
         from ultralytics import YOLO
 
-        return cls(model=YOLO(str(weights)), confidence_threshold=confidence_threshold)
+        return cls(model=YOLO(str(weights)), detection_threshold=detection_threshold)
 
     def analyze(self, frame: np.ndarray) -> VisionResult:
         if self.model is None or frame is None or frame.size == 0:
@@ -34,21 +36,20 @@ class VisionPipeline:
         results = self.model(frame, verbose=False)
         names = self.model.names
         detections: list[Detection] = []
-        confs: list[float] = []
         boxes = results[0].boxes
         if boxes is None:
             return VisionResult(None, [], 0.0, [])
         for xyxy, conf, cls_id in zip(boxes.xyxy, boxes.conf, boxes.cls):
             c = float(conf)
-            if c < self.confidence_threshold:
+            if c < self.detection_threshold:
                 continue
             tile = names[int(cls_id)]
             x1, y1, x2, y2 = map(float, xyxy)
             cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
             seat = seat_for_point(cx, cy, regions)
             detections.append(Detection(tile, (x1, y1, x2, y2), c, seat))
-            confs.append(c)
         winner = pick_winner(detections)
-        tiles = [d.tile for d in detections if d.seat == winner and d.tile != "face_down"]
-        confidence = sum(confs) / len(confs) if confs else 0.0
+        hand = [d for d in detections if winner is not None and d.seat == winner and d.tile != "face_down"]
+        tiles = [d.tile for d in hand]
+        confidence = min((d.confidence for d in hand), default=0.0)
         return VisionResult(winner_seat=winner, tiles=tiles, confidence=confidence, raw_detections=detections)

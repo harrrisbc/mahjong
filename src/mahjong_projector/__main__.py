@@ -33,7 +33,7 @@ def build_orchestrator(cfg: AppConfig, open_camera: bool = True) -> Orchestrator
 
     return Orchestrator(
         voice=VoiceListener(cfg.vosk_model_dir if cfg.vosk_model_dir.is_dir() else None),
-        vision=VisionPipeline.from_weights(cfg.yolo_weights, cfg.vision_confidence_threshold),
+        vision=VisionPipeline.from_weights(cfg.yolo_weights, cfg.vision_detection_threshold),
         fan_engine=FanEngine(),
         content=ContentMapper(cfg.manifest_path, cfg.content_dir),
         player=Player(display_index=cfg.display_index),
