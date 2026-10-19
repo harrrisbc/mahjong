@@ -7,9 +7,21 @@
   },
   {
     "name": "qing_yi_se",
-    "tiles": ["1m","1m","1m","2m","3m","4m","5m","6m","7m","8m","9m","9m","9m","5m"],
+    "tiles": ["1m","2m","3m","4m","5m","6m","7m","7m","7m","8m","8m","8m","9m","9m"],
     "winner_seat": "south",
     "expected_fan_id": "qing_yi_se"
+  },
+  {
+    "name": "jiu_lian_bao_deng_middle_extra",
+    "tiles": ["1m","1m","1m","2m","3m","4m","5m","6m","7m","8m","9m","9m","9m","5m"],
+    "winner_seat": "south",
+    "expected_fan_id": "jiu_lian_bao_deng"
+  },
+  {
+    "name": "jiu_lian_bao_deng_terminal_extra",
+    "tiles": ["1p","1p","1p","1p","2p","3p","4p","5p","6p","7p","8p","9p","9p","9p"],
+    "winner_seat": "north",
+    "expected_fan_id": "jiu_lian_bao_deng"
   },
   {
     "name": "zi_yi_se",

@@ -44,13 +44,10 @@ def has_nine_gates(tiles: list[str]) -> bool:
     need = {f"1{s}": 3, f"9{s}": 3}
     for n in range(2, 9):
         need[f"{n}{s}"] = 1
-    if len(tiles) != 14 or set(c) != set(need):
+    # 1112345678999 covers 13 tiles; a 14th on any rank 1-9 completes the gates
+    if len(tiles) != 14 or not set(c) <= set(need):
         return False
-    overflow = [k for k, v in need.items() if c.get(k, 0) > v]
-    if len(overflow) != 1:
-        return False
-    # v1: winning tile duplicate on a terminal (avoids false positive on standard qing hands)
-    return overflow[0] in (f"1{s}", f"9{s}")
+    return all(c.get(k, 0) >= v for k, v in need.items())
 
 
 def _dragon_pung_count(analysis: HandAnalysis) -> tuple[int, bool]:

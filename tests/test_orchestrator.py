@@ -12,7 +12,7 @@ class FakeVision:
     def analyze(self, frame):
         return VisionResult(
             winner_seat="east",
-            tiles=["1m","1m","1m","2m","3m","4m","5m","6m","7m","8m","9m","9m","9m","5m"],
+            tiles=["1m","2m","3m","4m","5m","6m","7m","7m","7m","8m","8m","8m","9m","9m"],
             confidence=0.9,
             raw_detections=[],
         )
