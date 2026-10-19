@@ -9,7 +9,7 @@ import numpy as np
 from mahjong_projector.content_map.mapper import ContentMapper
 from mahjong_projector.fan_engine.engine import FanEngine
 from mahjong_projector.player.playback import Player
-from mahjong_projector.types import HandState, PlayRequest, VoiceEvent
+from mahjong_projector.types import FanResult, HandState, PlayRequest, VoiceEvent
 from mahjong_projector.voice.listener import VoiceListener
 
 log = logging.getLogger(__name__)
@@ -51,17 +51,25 @@ class Orchestrator:
         if self.state not in ("idle", "listening"):
             log.info("ignore 食 mid-cycle state=%s", self.state)
             return None
-        if self.state == "idle":
-            self.state = "listening"
+        try:
+            req = self._classify()
+        except Exception:
+            log.exception("classification failed; falling back to default")
+            try:
+                req = self.content.resolve(FanResult(matched=[], selected=None))
+            except Exception:
+                log.exception("default resolve failed; skipping playback")
+                req = PlayRequest(video_path=None, reason="skip")
+        self._play(req)
+        return req
+
+    def _classify(self) -> PlayRequest:
         self.state = "capturing"
         frame = self.capture_frame()
         if frame is None:
             log.error("camera frame failed")
-            self.state = "listening"
-            req = self.content.resolve(self.fan_engine.score(HandState([], None)))
-            # force default/skip path via empty fan — ContentMapper no_fan → default/skip
-            self._play(req)
-            return req
+            # empty hand → no fan → ContentMapper default/skip
+            return self.content.resolve(self.fan_engine.score(HandState([], None)))
 
         self.state = "classifying"
         vision = self.vision.analyze(frame)
@@ -82,7 +90,6 @@ class Orchestrator:
         log.info("fans matched=%s selected=%s", fan_result.matched, fan_result.selected)
         req = self.content.resolve(fan_result)
         log.info("play path=%s reason=%s", req.video_path, req.reason)
-        self._play(req)
         return req
 
     def _play(self, req: PlayRequest) -> None:
