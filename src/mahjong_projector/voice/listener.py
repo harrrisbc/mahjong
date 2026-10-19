@@ -26,20 +26,43 @@ class VoiceListener:
             from vosk import KaldiRecognizer, Model
 
             self._recognizer = KaldiRecognizer(Model(str(model_dir)), sample_rate)
+        # Vosk repeats the growing partial on every chunk; latch so one utterance fires once.
+        self._latched = False
 
     def event_from_text(self, text: str) -> VoiceEvent | None:
         if KEYWORD in text:
             return VoiceEvent(keyword=KEYWORD, ts=time.time())
         return None
 
+    def reset(self) -> None:
+        self._latched = False
+        reset = getattr(self._recognizer, "Reset", None)
+        if callable(reset):
+            reset()
+
+    def _fire(self, text: str) -> VoiceEvent | None:
+        event = self.event_from_text(text)
+        if event is not None:
+            self.reset()
+            self._latched = True
+        return event
+
     def accept_audio(self, chunk: bytes) -> VoiceEvent | None:
         if self._recognizer is None:
             return None
         if self._recognizer.AcceptWaveform(chunk):
-            payload = json.loads(self._recognizer.Result())
-            return self.event_from_text(payload.get("text", ""))
+            text = json.loads(self._recognizer.Result()).get("text", "")
+            if self._latched:
+                self._latched = False
+                return None
+            event = self.event_from_text(text)
+            if event is not None:
+                self.reset()
+            return event
+        if self._latched:
+            return None
         partial = json.loads(self._recognizer.PartialResult()).get("partial", "")
-        return self.event_from_text(partial)
+        return self._fire(partial)
 
     def listen_forever(
         self,

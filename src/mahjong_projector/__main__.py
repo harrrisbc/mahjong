@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from collections.abc import Callable
 
 import numpy as np
 
@@ -64,8 +65,32 @@ def _mic_chunk_reader(sample_rate: int):
             return b""
         return q.pop(0)
 
+    def drain() -> None:
+        q.clear()
+
     read.stream = stream  # type: ignore[attr-defined]
+    read.drain = drain  # type: ignore[attr-defined]
     return read
+
+
+def voice_loop(
+    orch: Orchestrator,
+    read: Callable[[], bytes | None],
+    drain: Callable[[], None],
+) -> None:
+    while True:
+        chunk = read()
+        if chunk is None:
+            return
+        if not chunk:
+            continue
+        event = orch.voice.accept_audio(chunk)
+        if event is None:
+            continue
+        orch.on_voice(event)
+        # audio captured while classifying/playing must not re-trigger the next cycle
+        drain()
+        orch.voice.reset()
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -74,13 +99,7 @@ def main(argv: list[str] | None = None) -> int:
     log.info("listening for 食 — ctrl+c to exit")
     read = _mic_chunk_reader(cfg.sample_rate)
     try:
-        while True:
-            chunk = read()
-            if not chunk:
-                continue
-            event = orch.voice.accept_audio(chunk)
-            if event is not None:
-                orch.on_voice(event)
+        voice_loop(orch, read, read.drain)  # type: ignore[attr-defined]
     except KeyboardInterrupt:
         log.info("bye")
         return 0
