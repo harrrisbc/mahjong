@@ -27,7 +27,7 @@ def _suits_used(tiles: list[str]) -> set[str]:
     return {s for t in tiles if (s := suit_of(t)) is not None}
 
 
-def _has_thirteen_orphans(tiles: list[str]) -> bool:
+def has_thirteen_orphans(tiles: list[str]) -> bool:
     need = {f"{n}{s}" for s in "mps" for n in (1, 9)} | set(WINDS) | set(DRAGONS)
     c = count_tiles(tiles)
     if set(c) != need:
@@ -35,7 +35,7 @@ def _has_thirteen_orphans(tiles: list[str]) -> bool:
     return sum(1 for v in c.values() if v == 2) == 1 and all(v >= 1 for v in c.values())
 
 
-def _has_nine_gates(tiles: list[str]) -> bool:
+def has_nine_gates(tiles: list[str]) -> bool:
     suits = _suits_used(tiles)
     if len(suits) != 1 or any(is_honor(t) for t in tiles):
         return False
@@ -125,11 +125,11 @@ def _check_hun_yao_jiu(hand: HandState, analysis: HandAnalysis | None) -> bool:
 
 
 def _check_shi_san_yao(hand: HandState, analysis: HandAnalysis | None) -> bool:
-    return _has_thirteen_orphans(hand.tiles)
+    return has_thirteen_orphans(hand.tiles)
 
 
 def _check_jiu_lian(hand: HandState, analysis: HandAnalysis | None) -> bool:
-    return _has_nine_gates(hand.tiles)
+    return has_nine_gates(hand.tiles)
 
 
 def _check_ji_hu(hand: HandState, analysis: HandAnalysis | None) -> bool:

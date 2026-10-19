@@ -22,7 +22,7 @@ class HandAnalysis:
         return all(m.kind in {"pung", "kong"} for m in self.melds)
 
 
-def _strip_flowers(tiles: list[str]) -> list[str]:
+def strip_flowers(tiles: list[str]) -> list[str]:
     return [t for t in tiles if t not in FLOWERS]
 
 
@@ -74,7 +74,7 @@ def _search(counts: dict[str, int], melds: list[Meld]) -> list[Meld] | None:
 
 
 def analyze_hand(tiles: list[str]) -> HandAnalysis | None:
-    body = _strip_flowers(tiles)
+    body = strip_flowers(tiles)
     if len(body) not in {14, 11, 8}:  # allow partial revealed hands only at 14 for v1 win shape
         # v1: require 14-tile body for structured fans; callers may still use pattern fans on raw tiles
         pass
